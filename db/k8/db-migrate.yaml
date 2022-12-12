@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mysql-migrate
+spec:
+  template:
+    metadata:
+      labels:
+        app: mysql-migrate
+        tier: backend
+    spec:
+      containers:
+        - name: mysql-migrate
+          image: mysql-migrate:v0
+          imagePullPolicy: Never
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-root-secrets
+                  key: password
+
+            - name: MYSQL_DATABASE
+              value: GiftcardSiteDB
+
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-volume-mount
+              mountPath: /var/lib/mysql
+
+      volumes:
+        - name: mysql-volume-mount
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+
+
+      restartPolicy: Never

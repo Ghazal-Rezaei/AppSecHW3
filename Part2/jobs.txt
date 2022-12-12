@@ -1,0 +1,8 @@
+To do this part, I've made the following changes to the project:
+1. I created a migration job in the db/k8/db-migrate.yaml file
+2. I created a seeding job in the db/k8/db-seed.yaml file
+3. I edited the Dockerfiles in the db directory so that instead of copying the previous "setup.sql" file, which had the issue as described in part two of the assignment, it first does the migration, after that it does the seeding by copying the migrate.sql and djangoSeed.py respectively, which are explained below.
+4. I added a migrate.sql file to the db directory which contained all the migration parts of the previous setup.sql file (all the Alters/Creates without the loads).
+5. I added a djangoSeed.py file to the db directory which is a python script that uses a MySQL connector to interact with the database and hence do the seeding.
+It must be noted that, the seeding job mentioned in 2 makes use of the shell command python3 djangoSeed.py to run this script whenever seeding happens.
+Also, the migration and seeding jobs almost follow the same format as mysql-container but with their unique images. I got a few errors regarding the version of their image which were solved using the instructions in the FAQ you provided.

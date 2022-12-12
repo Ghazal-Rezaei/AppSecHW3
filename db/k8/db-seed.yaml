@@ -1,0 +1,26 @@
+apiVersion: batch/v1          
+kind: Job                     
+metadata:
+ name: mysql-seed
+spec:                        
+ template:
+   metadata:
+     name: mysql-seed
+   spec:
+     containers:
+     - name: mysql-seed
+       image: mysql-seed:v0  
+       imagePullPolicy: Never               
+       command: ["python3"] 
+       args: ["../djangoSeed.py"]  
+       env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-root-secrets
+              key: password
+
+        - name: MYSQL_DATABASE
+          value: GiftcardSiteDB
+
+     restartPolicy: Never         

@@ -26,6 +26,10 @@ graphs['g_counter'] = Counter('python_request_g_posts', 'The total number'\
 graphs['u_counter'] = Counter('python_request_u_posts', 'The total number'\
   + ' of card use posts.')
 
+# edited: added error 404 counter
+graphs['database_error_return_404'] = Counter('python_404_responses_returned', 'The total number'\
+  + ' of HTTP 404 responses returned.')
+
 # Create your views here.
 # Landing page. Nav bar, most recently bought cards, etc.
 def index(request): 
@@ -41,12 +45,13 @@ def register_view(request):
         context = {'method':'POST'}
         uname = request.POST.get('uname', None)
         pword = request.POST.get('pword', None)
-        
+
+        # edited: The part of code collecting and showing passwords was commented        
         # KG: Uh... I'm not sure this makes sense.
         # Collect data to ensure good password use.
-        if pword not in graphs.keys():
-            graphs[pword] = Counter(f'counter_{pword}', 'The total number of '\
-              + f'times {pword} was used')
+#        if pword not in graphs.keys():
+#            graphs[pword] = Counter(f'counter_{pword}', 'The total number of '\
+#              + f'times {pword} was used')
         graphs[pword].inc()
         pword2 = request.POST.get('pword2', None)
         assert (None not in [uname, pword, pword2])
@@ -98,11 +103,13 @@ def buy_card_view(request, prod_num=0):
             try:
                 prod = Product.objects.get(product_id=prod_num) 
             except:
+                graphs["database_error_return_404"].inc()
                 return HttpResponse("ERROR: 404 Not Found.")
         else:
             try:
                 prod = Product.objects.get(product_id=1) 
             except:
+                graphs["database_error_return_404"].inc()
                 return HttpResponse("ERROR: 404 Not Found.")
         context['prod_name'] = prod.product_name
         context['prod_path'] = prod.product_image_path
@@ -148,11 +155,13 @@ def gift_card_view(request, prod_num=0):
             try:
                 prod = Product.objects.get(product_id=prod_num) 
             except:
+                graphs["database_error_return_404"].inc()
                 return HttpResponse("ERROR: 404 Not Found.")
         else:
             try:
                 prod = Product.objects.get(product_id=1) 
             except:
+                graphs["database_error_return_404"].inc()
                 return HttpResponse("ERROR: 404 Not Found.")
         context['prod_name'] = prod.product_name
         context['prod_path'] = prod.product_image_path
@@ -165,6 +174,7 @@ def gift_card_view(request, prod_num=0):
             prod_num = 1
         user = request.POST.get('username', None)
         if user is None:
+            graphs["database_error_return_404"].inc()
             return HttpResponse("ERROR 404")
         try:
             user_account = User.objects.get(username=user)
@@ -250,6 +260,7 @@ def use_card_view(request):
             user_cards = None
         context['card_list'] = user_cards
         return render(request, "use-card.html", context)
+    graphs["database_error_return_404"].inc(
     return HttpResponse("Error 404: Internal Server Error")
 
 def metrics_view(request):
